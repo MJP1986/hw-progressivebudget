@@ -68,24 +68,11 @@ self.addEventListener("fetch", function (evt) {
 
     return;
   }
-});
-
-self.addEventListener("fetch", (event) => {
-  if (event.request.url.startsWith(self.location.origin)) {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        return caches.open(RUNTIME).then((cache) => {
-          return fetch(event.request).then((response) => {
-            return cache.put(event.request, response.clone()).then(() => {
-              return response;
-            });
-          });
-        });
-      })
-    );
-  }
+  evt.respondWith(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.match(evt.request).then((response) => {
+        return response || fetch(evt.request);
+      });
+    })
+  );
 });
